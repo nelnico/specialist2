@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CLIENT
+  SPECIALIST
+}
+
+enum ClientMembershipType {
+  FREE
+  BASIC
+  PREMIUM
+  ALL_ACCESS
+}
+
+model User {
+  id             Int         @id @default(autoincrement())
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime?   @updatedAt
+  role           UserRole?
+  username       String?
+  authProviderId String
+  lastLogin      DateTime?
+  client         Client?
+  specialist     Specialist?
+}
+
+model Client {
+  id               Int               @id @default(autoincrement())
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  userId           Int               @unique
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favorites        ClientFavorite[]
+  review           Review[]
+  ClientMembership ClientMembership?
+}
+
+model ClientMembership {
+  id                  Int                  @id @default(autoincrement())
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime?
+  membershipType      ClientMembershipType
+  membershipStartDate DateTime
+  membershipEndDate   DateTime?
+
+  clientId Int    @unique
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model ClientFavorite {
+  createdAt    DateTime   @default(now())
+  clientId     Int
+  specialistId Int
+  Client       Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  Specialist   Specialist @relation(fields: [specialistId], references: [id])
+
+  @@id([clientId, specialistId])
+}
+
+model Review {
+  id           Int            @id @default(autoincrement())
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  review       String
+  clientId     Int?
+  client       Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull) // we want to keep reviews if client is deleted
+  specialistId Int
+  specialist   Specialist     @relation(fields: [specialistId], references: [id])
+  reviewRating ReviewRating[]
+}
+
+model ReviewRating {
+  id                Int    @id @default(autoincrement())
+  reviewId          Int
+  review            Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  ratingOptionId    Int
+  ratingOptionValue Int
+}
+
+model Specialist {
+  id                Int                @id @default(autoincrement())
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime?          @updatedAt
+  name              String
+  specialtyIds      Int[]              @default([])
+  genderId          Int?
+  bio               String
+  userId            Int                @unique
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact           Contact?           @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId         Int?               @unique @map("contactInfoId")
+  favorites         ClientFavorite[]
+  reviews           Review[]
+  specialistSummary SpecialistSummary?
+  photos            SpecialistPhoto[]
+}
+
+model SpecialistPhoto {
+  id           Int        @id @default(autoincrement())
+  priority     Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  url          String
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  specialistId Int
+  isDeleted    Boolean    @default(false)
+}
+
+model SpecialistSummary {
+  id               Int                       @id @default(autoincrement())
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  specialistId     Int                       @unique
+  specialist       Specialist                @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  favoritedByCount Int                       @default(0)
+  viewedCount      Int                       @default(0)
+  reviewCount      Int                       @default(0)
+  averageRating    Float                     @default(0)
+  ratingSummaries  SpecialistRatingSummary[]
+}
+
+model SpecialistRatingSummary {
+  id                  Int               @id @default(autoincrement())
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  specialistSummaryId Int
+  specialistSummary   SpecialistSummary @relation(fields: [specialistSummaryId], references: [id], onDelete: Cascade)
+  ratingOptionId      Int
+  averageValue        Float             @default(0)
+
+  @@unique([specialistSummaryId, ratingOptionId])
+}
+
+model Contact {
+  id         Int              @id @default(autoincrement())
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  provinceId Int?
+  location1  String?
+  location2  String?
+  location3  String?
+  phones     ContactPhone[]
+  emails     ContactEmail[]
+  websites   ContactWebsite[]
+  specialist Specialist?
+}
+
+model ContactPhone {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  phone     String    @unique
+  primary   Boolean   @default(false)
+  verified  Boolean   @default(false)
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId Int
+}
+
+model ContactEmail {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  email     String    @unique
+  primary   Boolean
+  verified  Boolean   @default(false)
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId Int
+}
+
+model ContactWebsite {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  website   String    @unique
+  primary   Boolean
+  verified  Boolean   @default(false)
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId Int
+}
