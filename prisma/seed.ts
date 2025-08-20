@@ -149,6 +149,7 @@ async function createSpecialists() {
       const updatedAt = getRandomDateWithMonthsAgo(getRandomNumber(3, 11));
       const sex = faker.person.sex();
       const name = faker.person.firstName(sex as "male" | "female");
+      const companyName = faker.company.name();
       // create user account
       user = await prisma.user.create({
         data: {
@@ -171,17 +172,16 @@ async function createSpecialists() {
             createdAt: createdAt,
             updatedAt: updatedAt,
             userId: user.id,
-            name: name,
+            name: companyName,
             genderId: sex === "male" ? 2 : 1,
             bio: faker.lorem.paragraphs(3, "\n\n"),
             specialtyIds: chosen,
           },
         });
-        const gender = sex === "male" ? "male" : "female";
         if (specialist) {
           const photoCount = 3;
           const photos = Array.from({ length: photoCount }).map((_, idx) => ({
-            url: faker.image.personPortrait({ sex: gender, size: 512 }),
+            url: faker.image.personPortrait({ size: 512 }),
             priority: idx + 1,
             createdAt,
             updatedAt,

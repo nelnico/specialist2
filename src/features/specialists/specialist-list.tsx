@@ -39,7 +39,7 @@ export default function SpecialistList() {
   if (error) return <div>Error loading specialists</div>;
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
       {specialists.map((specialist, index) => {
         const triggerIndex = Math.floor(specialists.length * 0.75);
         const refToUse =
