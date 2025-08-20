@@ -24,7 +24,7 @@ import { queryKeys } from "@/lib/data/queryKeys";
 import { omitEmptySearchValues } from "@/lib/helpers/empty-helpers";
 
 const LOCAL_STORAGE_KEY = "last-search";
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 60;
 
 interface SpecialistSearchProviderProps {
   children: ReactNode;

@@ -7,7 +7,7 @@ import {
 } from "./specialist-search-types";
 import prisma from "@/lib/data/prisma";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 60;
 
 export async function searchSpecialist(
   params: Partial<SpecialistsSearchForm>
@@ -96,7 +96,6 @@ export async function searchSpecialist(
         name: true,
         genderId: true,
         specialtyIds: true,
-        // 👇 photos included, filtered & ordered
         photos: {
           where: { isDeleted: false },
           orderBy: { priority: "asc" },
@@ -125,7 +124,7 @@ export async function searchSpecialist(
 
     return specialists.map((s): SpecialistListItem => {
       const c = s.contact;
-      const locations = [c?.location1, c?.location2, c?.location3]
+      const locations = [c?.location3, c?.location2, c?.location1]
         .filter((loc): loc is string => Boolean(loc))
         .filter((loc, i, arr) => arr.indexOf(loc) === i)
         .join(", ");
@@ -137,9 +136,10 @@ export async function searchSpecialist(
         provinceId: c?.provinceId ?? undefined,
         location: locations || "Unknown",
         mainPhone: c?.phones?.[0]?.phone ?? "",
-        photos: s.photos.map((p) => ({ path: p.url })), // 👈 mapped in priority order
+        photos: s.photos.map((p) => ({ path: p.url })),
         averageRating: s.specialistSummary?.averageRating ?? 0,
         numberOfReviews: s.specialistSummary?.reviewCount ?? 0,
+        specialtyIds: s.specialtyIds || [],
       };
     });
   } catch (error) {

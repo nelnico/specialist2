@@ -57,4 +57,5 @@ export type SpecialistListItem = {
   location: string;
   averageRating: number;
   numberOfReviews: number;
+  specialtyIds: number[];
 };

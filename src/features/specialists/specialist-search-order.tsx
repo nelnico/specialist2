@@ -1,5 +1,7 @@
+import { Button } from "@/components/ui/button";
+
 const SpecialistSearchOrder = () => {
-  return <div>Order by control</div>;
+  return <Button>Order By</Button>;
 };
 
 export default SpecialistSearchOrder;
