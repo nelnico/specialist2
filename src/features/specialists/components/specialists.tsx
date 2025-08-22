@@ -6,9 +6,11 @@ import { SpecialistSearch } from "./specialist-search";
 const Specialists = async () => {
   return (
     <SpecialistSearchProvider>
-      <div className="sticky top-0 z-10 w-full bg-white p-4 shadow-md flex justify-between">
-        <SpecialistSearchOrder />
-        <SpecialistSearch />
+      <div className="sticky top-16 z-40 w-full bg-white border-b px-4 py-3 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <SpecialistSearchOrder />
+          <SpecialistSearch />
+        </div>
       </div>
       <SpecialistList />
     </SpecialistSearchProvider>

@@ -103,7 +103,7 @@ model Specialist {
   updatedAt         DateTime           @updatedAt
   name              String
   specialtyIds      Int[]              @default([])
-  genderId          Int?
+  genderId          Int
   yearOfBirth       Int?
   bio               String
   userId            Int                @unique
