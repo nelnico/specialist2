@@ -2,8 +2,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Specialist from "@/features/specialist/components/specialist";
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const id = Number(params.id);
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id: idStr } = await params;
+  const id = Number(idStr);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
   return (
