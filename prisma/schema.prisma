@@ -23,13 +23,15 @@ enum ClientMembershipType {
 model User {
   id             Int         @id @default(autoincrement())
   createdAt      DateTime    @default(now())
-  updatedAt      DateTime?   @updatedAt
+  updatedAt      DateTime    @updatedAt
   role           UserRole?
-  username       String?
-  authProviderId String
+  username       String?     @unique
+  authProviderId String      @unique
   lastLogin      DateTime?
   client         Client?
   specialist     Specialist?
+
+  @@index([createdAt])
 }
 
 model Client {
@@ -40,13 +42,15 @@ model Client {
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   favorites        ClientFavorite[]
   review           Review[]
-  ClientMembership ClientMembership?
+  clientMembership ClientMembership?
+
+  @@index([createdAt])
 }
 
 model ClientMembership {
   id                  Int                  @id @default(autoincrement())
   createdAt           DateTime             @default(now())
-  updatedAt           DateTime?
+  updatedAt           DateTime             @updatedAt
   membershipType      ClientMembershipType
   membershipStartDate DateTime
   membershipEndDate   DateTime?
@@ -63,6 +67,7 @@ model ClientFavorite {
   Specialist   Specialist @relation(fields: [specialistId], references: [id])
 
   @@id([clientId, specialistId])
+  @@index([specialistId])
 }
 
 model Review {
@@ -71,10 +76,13 @@ model Review {
   updatedAt    DateTime       @updatedAt
   review       String
   clientId     Int?
-  client       Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull) // we want to keep reviews if client is deleted
+  client       Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull) // keep reviews if client is deleted
   specialistId Int
   specialist   Specialist     @relation(fields: [specialistId], references: [id])
   reviewRating ReviewRating[]
+
+  @@index([specialistId])
+  @@index([createdAt])
 }
 
 model ReviewRating {
@@ -83,15 +91,20 @@ model ReviewRating {
   review            Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   ratingOptionId    Int
   ratingOptionValue Int
+
+  // Ensure only one rating per option per review
+  @@unique([reviewId, ratingOptionId])
+  @@index([ratingOptionId])
 }
 
 model Specialist {
   id                Int                @id @default(autoincrement())
   createdAt         DateTime           @default(now())
-  updatedAt         DateTime?          @updatedAt
+  updatedAt         DateTime           @updatedAt
   name              String
   specialtyIds      Int[]              @default([])
   genderId          Int?
+  yearOfBirth       Int?
   bio               String
   userId            Int                @unique
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -101,6 +114,11 @@ model Specialist {
   reviews           Review[]
   specialistSummary SpecialistSummary?
   photos            SpecialistPhoto[]
+
+  @@index([genderId])
+  @@index([createdAt])
+  @@index([name]) // basic btree; consider trigram externally if needed
+  @@index([specialtyIds], type: Gin) // speeds up hasSome on Int[] (Postgres)
 }
 
 model SpecialistPhoto {
@@ -112,6 +130,10 @@ model SpecialistPhoto {
   specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
   specialistId Int
   isDeleted    Boolean    @default(false)
+
+  // Keep a single photo per priority per specialist
+  @@unique([specialistId, priority])
+  @@index([specialistId])
 }
 
 model SpecialistSummary {
@@ -125,6 +147,10 @@ model SpecialistSummary {
   reviewCount      Int                       @default(0)
   averageRating    Float                     @default(0)
   ratingSummaries  SpecialistRatingSummary[]
+
+  @@index([averageRating])
+  @@index([reviewCount])
+  @@index([viewedCount])
 }
 
 model SpecialistRatingSummary {
@@ -137,6 +163,7 @@ model SpecialistRatingSummary {
   averageValue        Float             @default(0)
 
   @@unique([specialistSummaryId, ratingOptionId])
+  @@index([ratingOptionId])
 }
 
 model Contact {
@@ -151,37 +178,48 @@ model Contact {
   emails     ContactEmail[]
   websites   ContactWebsite[]
   specialist Specialist?
+
+  @@index([provinceId])
 }
 
 model ContactPhone {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-  phone     String    @unique
-  primary   Boolean   @default(false)
-  verified  Boolean   @default(false)
-  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  phone     String   @unique
+  primary   Boolean  @default(false)
+  verified  Boolean  @default(false)
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
   contactId Int
+
+  @@index([contactId])
+  @@index([primary])
 }
 
 model ContactEmail {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-  email     String    @unique
-  primary   Boolean
-  verified  Boolean   @default(false)
-  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  primary   Boolean  @default(false)
+  verified  Boolean  @default(false)
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
   contactId Int
+
+  @@index([contactId])
+  @@index([primary])
 }
 
 model ContactWebsite {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-  website   String    @unique
-  primary   Boolean
-  verified  Boolean   @default(false)
-  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  website   String   @unique
+  primary   Boolean  @default(false)
+  verified  Boolean  @default(false)
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
   contactId Int
+
+  @@index([contactId])
+  @@index([primary])
 }

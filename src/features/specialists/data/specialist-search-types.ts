@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE } from "@/lib/data/constants";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
@@ -7,12 +8,13 @@ export const SelectOption = z.object({
 });
 
 export const specialistsSearchSchema = z.object({
-  page: z.number().optional().default(0),
-  pageSize: z.number().optional().default(60),
-  query: z.string().trim().optional().default(""),
-  genderIds: z.array(SelectOption).optional(),
-  provinceIds: z.array(SelectOption).optional(),
-  specialtyIds: z.array(SelectOption).optional(),
+  page: z.coerce.number().int().nonnegative().default(0),
+  pageSize: z.coerce.number().int().positive().default(DEFAULT_PAGE_SIZE),
+  query: z.string().trim().default(""),
+  genderIds: z.array(SelectOption).default([]),
+  provinceIds: z.array(SelectOption).default([]),
+  specialtyIds: z.array(SelectOption).default([]),
+  ageRange: z.tuple([z.number(), z.number()]).optional(),
   sortOption: z.string().optional(),
 });
 
@@ -21,7 +23,7 @@ export type SpecialistsSearchForm = z.infer<typeof specialistsSearchSchema>;
 export const DefaultSpecialistSearchParams: SpecialistsSearchForm =
   specialistsSearchSchema.parse({
     page: 0,
-    pageSize: 60,
+    pageSize: DEFAULT_PAGE_SIZE,
     query: "",
     genderIds: [],
     provinceIds: [],
@@ -49,7 +51,7 @@ export type SpecialistSortOption = keyof typeof specialistOrderByMapping;
 
 export type SpecialistListItem = {
   id: number;
-  photos: { path: string }[];
+  photos: string[];
   mainPhone: string;
   name: string;
   genderId?: number;

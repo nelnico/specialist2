@@ -1,4 +1,4 @@
-import { SpecialistsSearchForm } from "@/features/specialists/specialist-search-types";
+import { SpecialistsSearchForm } from "@/features/specialists/data/specialist-search-types";
 
 export const queryKeys = {
   specialistSearch: (searchParams: SpecialistsSearchForm) => [

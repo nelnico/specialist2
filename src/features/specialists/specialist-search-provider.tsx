@@ -7,14 +7,16 @@ import React, {
   useMemo,
   useState,
   type ReactNode,
+  useCallback,
 } from "react";
 import {
   DefaultSpecialistSearchParams,
-  SpecialistListItem,
-  SpecialistSortOption,
-  SpecialistsSearchForm,
-} from "./specialist-search-types";
-import { searchSpecialist } from "./specialist-search-action";
+  type SpecialistListItem,
+  type SpecialistSortOption,
+  type SpecialistsSearchForm,
+  specialistsSearchSchema,
+} from "./data/specialist-search-types";
+import { searchSpecialist } from "./data/specialist-search-action";
 import {
   useInfiniteQuery,
   type QueryFunctionContext,
@@ -49,41 +51,75 @@ const SpecialistSearchContext = createContext<
 
 type SearchKey = ReturnType<typeof queryKeys.specialistSearch>;
 
+/** Synchronous localStorage hydration + zod validation */
+function loadInitialSearchParams(): SpecialistsSearchForm {
+  try {
+    if (typeof window === "undefined") {
+      return DefaultSpecialistSearchParams;
+    }
+    const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    const merged = { ...DefaultSpecialistSearchParams, ...parsed };
+    const res = specialistsSearchSchema.safeParse(merged);
+    return res.success ? res.data : DefaultSpecialistSearchParams;
+  } catch (e) {
+    console.error("Failed to load search params:", e);
+    return DefaultSpecialistSearchParams;
+  }
+}
+
+/**
+ * Build the payload for the server action:
+ * - client 1-based page → server 0-based
+ * - include client PAGE_SIZE
+ * - omit empty values relative to defaults
+ * - ALWAYS return an object (never undefined) to satisfy the server action signature
+ */
+function buildCleanSearchPayload(
+  params: SpecialistsSearchForm,
+  clientPage: number
+): Partial<SpecialistsSearchForm> {
+  const search: SpecialistsSearchForm = {
+    ...params,
+    page: Math.max(0, clientPage - 1),
+    pageSize: PAGE_SIZE,
+  };
+
+  const clean = omitEmptySearchValues(
+    search,
+    DefaultSpecialistSearchParams
+  ) as Partial<SpecialistsSearchForm>;
+
+  // return {} if nothing meaningful changed; server action merges with defaults
+  return Object.keys(clean).length === 0 ? {} : clean;
+}
+
 export const SpecialistSearchProvider: React.FC<
   SpecialistSearchProviderProps
 > = ({ children }) => {
-  const [searchParams, setSearchParams] = useState<SpecialistsSearchForm>(
-    DefaultSpecialistSearchParams
+  const [searchParams, setSearchParams] = useState<SpecialistsSearchForm>(() =>
+    loadInitialSearchParams()
   );
 
+  // persist on change
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setSearchParams({ ...DefaultSpecialistSearchParams, ...parsed });
-      }
-    } catch (err) {
-      console.error("Failed to load search params:", err);
-      setSearchParams(DefaultSpecialistSearchParams);
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(searchParams));
-    } catch (err) {
-      console.error("Failed to save search params:", err);
+      window.localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify(searchParams)
+      );
+    } catch (e) {
+      console.error("Failed to save search params:", e);
     }
   }, [searchParams]);
 
-  const changeOrder = (option: SpecialistSortOption) => {
+  const changeOrder = useCallback((option: SpecialistSortOption) => {
     setSearchParams((prev) => ({
       ...prev,
       sortOption: option,
-      page: 0, // server expects 0-based
+      page: 0,
     }));
-  };
+  }, []);
 
   const fetchSpecialists = async ({
     pageParam = 1,
@@ -92,16 +128,9 @@ export const SpecialistSearchProvider: React.FC<
   > => {
     const clientPage =
       typeof pageParam === "number" ? pageParam : Number(pageParam) || 1;
-    const search: SpecialistsSearchForm = {
-      ...searchParams,
-      page: Math.max(0, clientPage - 1), // convert to 0-based for server
-      pageSize: PAGE_SIZE,
-    };
-    const clean = omitEmptySearchValues(
-      search,
-      DefaultSpecialistSearchParams
-    ) as Partial<SpecialistsSearchForm>;
-    return await searchSpecialist(clean);
+
+    const payload = buildCleanSearchPayload(searchParams, clientPage);
+    return await searchSpecialist(payload); // payload is always an object
   };
 
   const infiniteKey = useMemo<SearchKey>(
@@ -126,11 +155,12 @@ export const SpecialistSearchProvider: React.FC<
   >({
     queryKey: infiniteKey,
     queryFn: fetchSpecialists,
-    initialPageParam: 1, // client is 1-based
+    initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) =>
       lastPage?.length ? allPages.length + 1 : undefined,
   });
 
+  // Scroll-to-top when page changes
   useEffect(() => {
     if (typeof searchParams.page === "number") {
       window.scrollTo({ top: 0, behavior: "smooth" });

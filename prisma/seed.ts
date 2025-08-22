@@ -1,3 +1,4 @@
+import { IMAGE_BASE_URL, MAX_AGE, MIN_AGE } from "@/lib/data/constants";
 import { faker } from "@faker-js/faker";
 import {
   Client,
@@ -8,8 +9,8 @@ import {
 import { subMonths } from "date-fns";
 
 const prisma = new PrismaClient();
-const CLIENT_COUNT = 500;
-const SPECIALIST_COUNT = 500;
+const CLIENT_COUNT = 600;
+const SPECIALIST_COUNT = 600;
 
 async function main() {
   try {
@@ -149,7 +150,6 @@ async function createSpecialists() {
       const updatedAt = getRandomDateWithMonthsAgo(getRandomNumber(3, 11));
       const sex = faker.person.sex();
       const name = faker.person.firstName(sex as "male" | "female");
-      const companyName = faker.company.name();
       // create user account
       user = await prisma.user.create({
         data: {
@@ -172,16 +172,23 @@ async function createSpecialists() {
             createdAt: createdAt,
             updatedAt: updatedAt,
             userId: user.id,
-            name: companyName,
+            name,
             genderId: sex === "male" ? 2 : 1,
+            yearOfBirth: getRandomNumber(
+              new Date().getFullYear() - MAX_AGE,
+              new Date().getFullYear() - MIN_AGE
+            ),
             bio: faker.lorem.paragraphs(3, "\n\n"),
             specialtyIds: chosen,
           },
         });
         if (specialist) {
           const photoCount = 3;
+          const gender = sex === "male" ? "male" : "female";
           const photos = Array.from({ length: photoCount }).map((_, idx) => ({
-            url: faker.image.personPortrait({ size: 512 }),
+            url: faker.image
+              .personPortrait({ sex: gender, size: 512 })
+              .replace(IMAGE_BASE_URL, ""),
             priority: idx + 1,
             createdAt,
             updatedAt,
