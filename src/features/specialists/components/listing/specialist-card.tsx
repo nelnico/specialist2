@@ -38,7 +38,7 @@ const SpecialistCard = forwardRef<HTMLDivElement, SpecialistCardProps>(
         className="cursor-pointer p-2 text-xs"
       >
         <>
-          {JSON.stringify(specialist, null, 2)}
+          <p className="line-clamp-6">{JSON.stringify(specialist, null, 2)}</p>
           <SpecialistRatingDisplay
             averageRating={specialist.averageRating}
             numReviews={specialist.numberOfReviews}

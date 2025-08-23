@@ -1,5 +1,6 @@
 "use client";
 
+import { Rating } from "@/components/ui/rating";
 import * as React from "react";
 
 interface SpecialistRatingDisplayProps {
@@ -16,8 +17,10 @@ export function SpecialistRatingDisplay({
   }
 
   return (
-    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-      <span>Rating: {averageRating.toFixed(1)}</span>
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <span>
+        <Rating rating={averageRating} size="sm" />
+      </span>
       <span>
         ({numReviews} {numReviews === 1 ? "review" : "reviews"})
       </span>
