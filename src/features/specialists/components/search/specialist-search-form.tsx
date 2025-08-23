@@ -10,14 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  MultiSelect,
-  MultiSelectContent,
-  MultiSelectGroup,
-  MultiSelectItem,
-  MultiSelectTrigger,
-  MultiSelectValue,
-} from "@/components/ui/multi-select";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -50,7 +42,7 @@ const SpecialistSearchForm = () => {
     mode: "onChange",
   });
 
-  const { register, control, reset } = form;
+  const { control, reset } = form;
 
   useEffect(() => {
     reset(normalizedDefaults);

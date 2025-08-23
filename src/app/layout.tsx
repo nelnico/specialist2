@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AppProviders } from "./app-providers";
+import { AppProviders } from "../providers/app-providers";
 import { siteConfig } from "@/lib/data/site-config";
-import Header from "@/components/navigation/header";
+import { Header } from "@/components/navigation/header";
 
 export const metadata: Metadata = {
   title: siteConfig.title,

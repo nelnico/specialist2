@@ -10,8 +10,6 @@ import {
 import prisma from "@/lib/data/prisma";
 import { DEFAULT_PAGE_SIZE, MAX_AGE, MIN_AGE } from "@/lib/data/constants";
 
-type IdInput = string | { value?: string };
-
 const buildLocations = (c?: {
   location1?: string | null;
   location2?: string | null;
