@@ -12,12 +12,6 @@ import { DEFAULT_PAGE_SIZE, MAX_AGE, MIN_AGE } from "@/lib/data/constants";
 
 type IdInput = string | { value?: string };
 
-/** Utils */
-const toIds = (arr: IdInput[]): number[] =>
-  arr
-    .map((x) => (typeof x === "string" ? Number(x) : Number(x.value)))
-    .filter((n): n is number => Number.isFinite(n));
-
 const buildLocations = (c?: {
   location1?: string | null;
   location2?: string | null;
@@ -111,9 +105,9 @@ export async function searchSpecialist(
 
     /** Inputs */
     const query = (merged.query ?? "").trim();
-    const genderIds = toIds(merged.genderIds ?? []);
-    const provinceIds = toIds(merged.provinceIds ?? []);
-    const specialtyIds = toIds(merged.specialtyIds ?? []);
+    const genderIds = merged.genderIds ?? [];
+    const provinceIds = merged.provinceIds ?? [];
+    const specialtyIds = merged.specialtyIds ?? [];
     const sortKey = (merged.sortOption ?? "newest") as SpecialistSortOption;
 
     /** Where (declarative) */

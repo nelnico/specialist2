@@ -19,14 +19,14 @@ export function SpecialistSearch() {
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Edit profile</SheetTitle>
+          <SheetTitle>Search Specialists</SheetTitle>
           <SheetDescription>
-            Make changes to your profile here. Click save when you&apos;re done.
+            Use the form below to search for specialists.
           </SheetDescription>
         </SheetHeader>
         <SpecialistSearchForm />
         <SheetFooter>
-          <Button type="submit">Save changes</Button>
+          <Button type="submit">Search</Button>
           <SheetClose asChild>
             <Button variant="outline">Close</Button>
           </SheetClose>

@@ -2,7 +2,7 @@
 
 import React, { forwardRef, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
-import type { SpecialistListItem } from "../data/specialist-search-types";
+import type { SpecialistListItem } from "../../data/specialist-search-types";
 import { Card } from "@/components/ui/card";
 
 type SpecialistCardProps = {

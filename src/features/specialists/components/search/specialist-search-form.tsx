@@ -10,16 +10,30 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectItem,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from "@/components/ui/multi-select";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useSpecialistSearch } from "../specialist-search-provider";
-import {
-  specialistsSearchSchema,
-  type SpecialistsSearchForm,
-} from "../data/specialist-search-types";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
+import { useSpecialistSearch } from "../../specialist-search-provider";
+import {
+  SpecialistsSearchForm,
+  specialistsSearchSchema,
+} from "../../data/specialist-search-types";
+import FormMultiSelect from "./form-multi-select";
+import {
+  genderOptions,
+  provinceOptions,
+  specialtyOptions,
+} from "@/lib/data/data-options";
 const SpecialistSearchForm = () => {
   const { searchParams, setSearchParams } = useSpecialistSearch();
 
@@ -86,6 +100,27 @@ const SpecialistSearchForm = () => {
             <FormMessage />
           </FormItem>
         )}
+      />
+      <FormMultiSelect
+        control={form.control}
+        name="provinceIds"
+        label="Province"
+        options={provinceOptions}
+        placeholder="Select province(s)..."
+      />
+      <FormMultiSelect
+        control={form.control}
+        name="specialtyIds"
+        label="Specialty"
+        options={specialtyOptions}
+        placeholder="Select specialty(s)..."
+      />
+      <FormMultiSelect
+        control={form.control}
+        name="genderIds"
+        label="Genders"
+        options={genderOptions}
+        placeholder="Select gender(s)..."
       />
     </Form>
   );

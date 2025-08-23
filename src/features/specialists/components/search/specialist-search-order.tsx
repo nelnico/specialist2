@@ -8,11 +8,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMemo } from "react";
-import { useSpecialistSearch } from "../specialist-search-provider";
+import { useSpecialistSearch } from "../../specialist-search-provider";
 import {
   escortSortOptionLabels,
   type SpecialistSortOption,
-} from "../data/specialist-search-types";
+} from "../../data/specialist-search-types";
 
 const SpecialistSearchOrder = () => {
   const { searchParams, setSearchParams } = useSpecialistSearch();

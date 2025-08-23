@@ -1,7 +1,7 @@
-import SpecialistSearchOrder from "./specialist-search-order";
-import SpecialistList from "./specialist-list";
+import SpecialistSearchOrder from "./search/specialist-search-order";
+import SpecialistList from "./listing/specialist-list";
 import { SpecialistSearchProvider } from "../specialist-search-provider";
-import { SpecialistSearch } from "./specialist-search";
+import { SpecialistSearch } from "./search/specialist-search";
 
 const Specialists = async () => {
   return (

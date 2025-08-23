@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSpecialistSearch } from "../specialist-search-provider";
+import { useSpecialistSearch } from "../../specialist-search-provider";
 import { useInView } from "react-intersection-observer";
 import SpecialistCard from "./specialist-card";
 import useMounted from "@/hooks/use-mounted";

@@ -11,9 +11,9 @@ export const specialistsSearchSchema = z.object({
   page: z.coerce.number().int().nonnegative().default(0),
   pageSize: z.coerce.number().int().positive().default(DEFAULT_PAGE_SIZE),
   query: z.string().trim().default(""),
-  genderIds: z.array(SelectOption).default([]),
-  provinceIds: z.array(SelectOption).default([]),
-  specialtyIds: z.array(SelectOption).default([]),
+  genderIds: z.array(z.number()).default([]),
+  provinceIds: z.array(z.number()).default([]),
+  specialtyIds: z.array(z.number()).default([]),
   ageRange: z.tuple([z.number(), z.number()]).optional(),
   sortOption: z.string().optional(),
 });
