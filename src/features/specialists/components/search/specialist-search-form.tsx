@@ -20,7 +20,7 @@ import {
   SpecialistsSearchForm,
   specialistsSearchSchema,
 } from "../../data/specialist-search-types";
-import FormMultiSelect from "./form-multi-select";
+import SpecialistSearchSelect from "./specialist-search-select";
 import {
   genderOptions,
   provinceOptions,
@@ -93,21 +93,22 @@ const SpecialistSearchForm = () => {
           </FormItem>
         )}
       />
-      <FormMultiSelect
+      <SpecialistSearchSelect
         control={form.control}
         name="provinceIds"
         label="Province"
         options={provinceOptions}
         placeholder="Select province(s)..."
+        multiple={false}
       />
-      <FormMultiSelect
+      <SpecialistSearchSelect
         control={form.control}
         name="specialtyIds"
         label="Specialty"
         options={specialtyOptions}
         placeholder="Select specialty(s)..."
       />
-      <FormMultiSelect
+      <SpecialistSearchSelect
         control={form.control}
         name="genderIds"
         label="Genders"

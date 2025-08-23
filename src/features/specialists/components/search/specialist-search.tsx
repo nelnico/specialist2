@@ -1,12 +1,8 @@
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
-  SheetDescription,
-  SheetFooter,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import SpecialistSearchForm from "./specialist-search-form";
@@ -18,19 +14,17 @@ export function SpecialistSearch() {
         <Button variant="outline">Search</Button>
       </SheetTrigger>
       <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Search Specialists</SheetTitle>
-          <SheetDescription>
-            Use the form below to search for specialists.
-          </SheetDescription>
-        </SheetHeader>
-        <SpecialistSearchForm />
+        <SheetHeader></SheetHeader>
+        <div className="flex gap-4 flex-col px-4">
+          <SpecialistSearchForm />
+        </div>
+        {/* 
         <SheetFooter>
           <Button type="submit">Search</Button>
           <SheetClose asChild>
             <Button variant="outline">Close</Button>
           </SheetClose>
-        </SheetFooter>
+        </SheetFooter> */}
       </SheetContent>
     </Sheet>
   );

@@ -150,7 +150,6 @@ export function MultiSelectTrigger({
               clearAll();
             }}
             onPointerDown={(e) => {
-              // Prevent Radix from toggling the popover on pointer down
               e.preventDefault();
               e.stopPropagation();
             }}
@@ -158,7 +157,7 @@ export function MultiSelectTrigger({
             <XIcon className="size-4 opacity-70 cursor-pointer" />
           </span>
         ) : (
-          <ChevronsUpDownIcon className="size-4 shrink-0 opacity-50" />
+          <ChevronsUpDownIcon className="size-4 shrink-0 opacity-50 cursor-pointer" />
         )}
       </Button>
     </PopoverTrigger>
