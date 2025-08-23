@@ -4,6 +4,7 @@ import React, { forwardRef, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { SpecialistListItem } from "../../data/specialist-search-types";
 import { Card } from "@/components/ui/card";
+import { SpecialistRatingDisplay } from "@/features/specialist/components/specialist-rating-display";
 
 type SpecialistCardProps = {
   specialist: SpecialistListItem;
@@ -36,7 +37,13 @@ const SpecialistCard = forwardRef<HTMLDivElement, SpecialistCardProps>(
         onKeyDown={onKeyDown}
         className="cursor-pointer p-2 text-xs"
       >
-        {JSON.stringify(specialist, null, 2)}
+        <>
+          {JSON.stringify(specialist, null, 2)}
+          <SpecialistRatingDisplay
+            averageRating={specialist.averageRating}
+            numReviews={specialist.numberOfReviews}
+          />
+        </>
       </Card>
     );
   }
