@@ -1,15 +1,17 @@
 "use server";
+
 import { Prisma } from "@prisma/client";
+import prisma from "@/lib/data/prisma";
+import { DEFAULT_PAGE_SIZE, MAX_AGE, MIN_AGE } from "@/lib/data/constants";
 import {
   DefaultSpecialistSearchParams,
-  SpecialistListItem,
-  SpecialistsSearchForm,
+  type SpecialistListItem,
+  type SpecialistsSearchForm,
   specialistOrderByMapping,
   type SpecialistSortOption,
 } from "./specialist-search-types";
-import prisma from "@/lib/data/prisma";
-import { DEFAULT_PAGE_SIZE, MAX_AGE, MIN_AGE } from "@/lib/data/constants";
 
+// ---------- helpers ----------
 const buildLocations = (c?: {
   location1?: string | null;
   location2?: string | null;
@@ -20,21 +22,21 @@ const buildLocations = (c?: {
     .filter((loc, i, arr) => arr.indexOf(loc) === i)
     .join(", ") || "Unknown";
 
-/** Normalize and clamp an age range; return undefined if it's effectively "no filter" */
+/** Normalize and clamp an age range; return undefined if it's effectively no-op */
 function normalizeAgeRange(
   input?: [number, number]
 ): [number, number] | undefined {
   if (!input) return undefined;
   let [min, max] = input;
   if (!Number.isFinite(min) || !Number.isFinite(max)) return undefined;
-  if (min > max) [min, max] = [max, min]; // swap if inverted
+  if (min > max) [min, max] = [max, min];
   min = Math.max(MIN_AGE, Math.floor(min));
   max = Math.min(MAX_AGE, Math.floor(max));
-  if (min <= MIN_AGE && max >= MAX_AGE) return undefined; // full span = no-op
+  if (min <= MIN_AGE && max >= MAX_AGE) return undefined;
   return [min, max];
 }
 
-/** Convert an age range into a Prisma where condition against yearOfBirth */
+/** Convert age range to a where condition on yearOfBirth */
 function getAgeCondition(
   ageRange?: [number, number]
 ): Prisma.SpecialistWhereInput | undefined {
@@ -43,20 +45,13 @@ function getAgeCondition(
 
   const [min, max] = norm;
   const currentYear = new Date().getFullYear();
-
-  // age X ⇒ yearOfBirth ≈ currentYear - X
   const minYear = currentYear - max; // older bound
   const maxYear = currentYear - min; // younger bound
 
-  return {
-    yearOfBirth: {
-      gte: minYear,
-      lte: maxYear,
-    },
-  };
+  return { yearOfBirth: { gte: minYear, lte: maxYear } };
 }
 
-/** Stable and re-usable select */
+/** Stable select for list view */
 const specialistListSelect = {
   id: true,
   name: true,
@@ -64,8 +59,8 @@ const specialistListSelect = {
   specialtyIds: true,
   photos: {
     where: { isDeleted: false },
-    orderBy: { priority: "asc" as const },
-    take: 2,
+    orderBy: [{ priority: "desc" as const }, { id: "asc" as const }],
+    take: 4,
     select: { url: true },
   },
   contact: {
@@ -76,6 +71,7 @@ const specialistListSelect = {
       location3: true,
       phones: {
         where: { primary: true },
+        orderBy: { id: "asc" as const },
         select: { phone: true },
         take: 1,
       },
@@ -85,15 +81,17 @@ const specialistListSelect = {
     select: {
       averageRating: true,
       reviewCount: true,
+      viewedCount: true,
     },
   },
 } satisfies Prisma.SpecialistSelect;
 
+// ---------- main ----------
 export async function searchSpecialist(
   params: Partial<SpecialistsSearchForm>
 ): Promise<SpecialistListItem[]> {
   try {
-    /** Merge + sanitize paging */
+    // Merge with defaults and clamp paging
     const merged = { ...DefaultSpecialistSearchParams, ...params };
     const page = Math.max(0, merged.page ?? 0);
     const pageSize = Math.min(
@@ -101,14 +99,14 @@ export async function searchSpecialist(
       DEFAULT_PAGE_SIZE
     );
 
-    /** Inputs */
+    // Inputs
     const query = (merged.query ?? "").trim();
     const genderIds = merged.genderIds ?? [];
     const provinceIds = merged.provinceIds ?? [];
     const specialtyIds = merged.specialtyIds ?? [];
     const sortKey = (merged.sortOption ?? "newest") as SpecialistSortOption;
 
-    /** Where (declarative) */
+    // Where
     const where: Prisma.SpecialistWhereInput = {
       AND: [
         query && {
@@ -143,14 +141,14 @@ export async function searchSpecialist(
       ].filter(Boolean) as Prisma.SpecialistWhereInput[],
     };
 
-    /** OrderBy (single source of truth + deterministic tiebreaker) */
-    const primaryOrder =
+    // OrderBy (mapping + deterministic tiebreaker)
+    const primary =
       specialistOrderByMapping[sortKey] ?? specialistOrderByMapping.newest;
-    const orderBy = Array.isArray(primaryOrder)
-      ? [...primaryOrder, { id: "desc" as const }]
-      : [primaryOrder, { id: "desc" as const }];
+    const orderBy = Array.isArray(primary)
+      ? [...primary, { id: "desc" as const }]
+      : [primary, { id: "desc" as const }];
 
-    /** Query */
+    // Query
     const specialists = await prisma.specialist.findMany({
       where,
       skip: page * pageSize,
@@ -159,24 +157,24 @@ export async function searchSpecialist(
       select: specialistListSelect,
     });
 
-    /** Map to list item */
-    return specialists.map((s): SpecialistListItem => {
+    // Map to list items
+    return specialists.map((s) => {
       const c = s.contact;
       return {
         id: s.id,
+        photos: s.photos.map((p) => p.url),
+        mainPhone: c?.phones?.[0]?.phone ?? "",
         name: s.name,
         genderId: s.genderId ?? undefined,
         provinceId: c?.provinceId ?? undefined,
         location: buildLocations(c ?? undefined),
-        mainPhone: c?.phones?.[0]?.phone ?? "",
-        photos: s.photos.map((p) => p.url),
         averageRating: s.specialistSummary?.averageRating ?? 0,
         numberOfReviews: s.specialistSummary?.reviewCount ?? 0,
         specialtyIds: s.specialtyIds ?? [],
-      };
+      } satisfies SpecialistListItem;
     });
-  } catch (error) {
-    console.error("Error in searchSpecialist:", error);
+  } catch (err) {
+    console.error("Error in searchSpecialist:", err);
     return [];
   }
 }

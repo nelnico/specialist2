@@ -1,12 +1,14 @@
-import { DEFAULT_PAGE_SIZE } from "@/lib/data/constants";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { DEFAULT_PAGE_SIZE } from "@/lib/data/constants";
 
+// ---------- Shared UI types ----------
 export const SelectOption = z.object({
   label: z.string(),
   value: z.string(),
 });
 
+// ---------- Search schema ----------
 export const specialistsSearchSchema = z.object({
   page: z.coerce.number().int().nonnegative().default(0),
   pageSize: z.coerce.number().int().positive().default(DEFAULT_PAGE_SIZE),
@@ -31,24 +33,45 @@ export const DefaultSpecialistSearchParams: SpecialistsSearchForm =
     sortOption: "newest",
   });
 
-export const specialistOrderByMapping: Record<
-  string,
-  Prisma.SpecialistOrderByWithRelationInput
-> = {
-  highestRated: { specialistSummary: { averageRating: "desc" } },
-  newest: { createdAt: "desc" },
-  // You can add other options later when they are available
-};
+// ---------- Sorting ----------
+// Single source of truth: UI derives its options from these keys.
+export const specialistOrderByMapping = {
+  newest: [{ createdAt: "desc" as const }, { id: "desc" as const }],
 
-export const escortSortOptionLabels: Record<string, string> = {
+  highestRated: [
+    { specialistSummary: { averageRating: "desc" as const } },
+    { specialistSummary: { reviewCount: "desc" as const } },
+    { id: "desc" as const },
+  ],
+
+  mostViewed: [
+    { specialistSummary: { viewedCount: "desc" as const } },
+    { id: "desc" as const },
+  ],
+
+  mostReviewed: [
+    { specialistSummary: { reviewCount: "desc" as const } },
+    { id: "desc" as const },
+  ],
+} satisfies Record<
+  string,
+  | Prisma.SpecialistOrderByWithRelationInput
+  | Prisma.SpecialistOrderByWithRelationInput[]
+>;
+
+export type SpecialistSortOption = keyof typeof specialistOrderByMapping;
+
+export const escortSortOptionLabels: Record<
+  keyof typeof specialistOrderByMapping,
+  string
+> = {
   newest: "Newest",
   highestRated: "Top Rated",
   mostViewed: "Top Viewed",
   mostReviewed: "Top Reviewed",
 };
 
-export type SpecialistSortOption = keyof typeof specialistOrderByMapping;
-
+// ---------- List item projection ----------
 export type SpecialistListItem = {
   id: number;
   photos: string[];
