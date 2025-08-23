@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="min-w-80  antialiased">
+      <body className="min-w-80 antialiased">
         <AppProviders>
           <Header />
           <main className="relative">{children}</main>
