@@ -133,14 +133,14 @@ export function Header() {
                   </div>
                 </div>
 
-                {/* Documentation */}
+                {/* Join Us */}
                 <div className="space-y-3">
                   <MobileLink
-                    href="/docs"
+                    href="/join"
                     onOpenChange={setIsOpen}
                     className="font-medium"
                   >
-                    Documentation
+                    Join Us
                   </MobileLink>
                 </div>
               </div>
@@ -221,9 +221,9 @@ export function Header() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/docs" legacyBehavior passHref>
+                <Link href="/join" passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Documentation
+                    Join Us
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>

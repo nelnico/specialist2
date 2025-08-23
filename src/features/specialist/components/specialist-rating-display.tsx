@@ -1,11 +1,10 @@
 "use client";
 
 import { Rating } from "@/components/ui/rating";
-import * as React from "react";
 
 interface SpecialistRatingDisplayProps {
   numReviews: number;
-  averageRating: number; // 0 to 5
+  averageRating: number;
 }
 
 export function SpecialistRatingDisplay({
