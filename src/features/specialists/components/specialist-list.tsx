@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useSpecialistSearch } from "../specialist-search-provider";
 import { useInView } from "react-intersection-observer";
 import SpecialistCard from "./specialist-card";
@@ -16,10 +16,12 @@ export default function SpecialistList() {
     error,
   } = useSpecialistSearch();
 
-  const { ref, inView } = useInView({ threshold: 0.5 });
   const mounted = useMounted();
 
-  const fetchingRef = useRef(false);
+  const { ref: sentinelRef, inView } = useInView({
+    threshold: 0,
+    rootMargin: "400px 0px",
+  });
 
   useEffect(() => {
     if (mounted && !isLoading && !isFetchingNextPage) {
@@ -32,20 +34,31 @@ export default function SpecialistList() {
   }, [mounted, isLoading, isFetchingNextPage]);
 
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage && !fetchingRef.current) {
-      fetchingRef.current = true;
+    if (!inView) return;
+    if (!hasNextPage) return;
+    if (isFetchingNextPage) return;
 
-      (async () => {
-        try {
-          await fetchNextPage();
-        } finally {
-          setTimeout(() => {
-            fetchingRef.current = false;
-          }, 500); // Adjust delay if needed
-        }
-      })();
+    fetchNextPage();
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (isFetchingNextPage) return;
+    if (!hasNextPage) return;
+
+    const needsMore =
+      document.documentElement.scrollHeight <= window.innerHeight + 100;
+
+    if (needsMore) {
+      fetchNextPage();
     }
-  }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
+  }, [
+    specialists.length,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  ]);
 
   if (isLoading) return <div>Loading specialists...</div>;
   if (error) return <div>Error loading specialists</div>;
@@ -55,27 +68,24 @@ export default function SpecialistList() {
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-      {specialists.map((specialist, index) => {
-        const triggerIndex = Math.floor(specialists.length * 0.75);
-        const refToUse =
-          hasNextPage && index === triggerIndex ? ref : undefined;
-
-        return (
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+        {specialists.map((specialist) => (
           <SpecialistCard
             onClick={savePosition}
             key={specialist.id}
             specialist={specialist}
-            ref={refToUse}
           />
-        );
-      })}
+        ))}
+      </div>
+
+      <div ref={sentinelRef} />
 
       {isFetchingNextPage && hasNextPage && (
         <div>
           <div>Loading more...</div>
         </div>
       )}
-    </div>
+    </>
   );
 }

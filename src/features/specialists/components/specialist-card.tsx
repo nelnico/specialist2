@@ -6,7 +6,7 @@ import type { SpecialistListItem } from "../data/specialist-search-types";
 import { Card } from "@/components/ui/card";
 
 type SpecialistCardProps = {
-  specialist: SpecialistListItem; // must include `id: number`
+  specialist: SpecialistListItem;
   onClick: () => void;
 };
 

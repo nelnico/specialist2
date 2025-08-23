@@ -1,3 +1,4 @@
+"use client";
 import { SpecialistReviewSummary } from "../data/specialist-types";
 
 interface SpecialistReviewsProps {

@@ -8,6 +8,7 @@ import React, {
   useState,
   type ReactNode,
   useCallback,
+  useRef,
 } from "react";
 import {
   DefaultSpecialistSearchParams,
@@ -25,7 +26,10 @@ import {
 import { queryKeys } from "@/lib/data/queryKeys";
 import { omitEmptySearchValues } from "@/lib/helpers/empty-helpers";
 
-const LOCAL_STORAGE_KEY = "last-search";
+// 👇 import your single atom
+import { useAtom } from "jotai";
+import { storageStateAtom } from "@/lib/state/storage/storage-state-atom";
+
 const PAGE_SIZE = 60;
 
 interface SpecialistSearchProviderProps {
@@ -51,29 +55,12 @@ const SpecialistSearchContext = createContext<
 
 type SearchKey = ReturnType<typeof queryKeys.specialistSearch>;
 
-/** Synchronous localStorage hydration + zod validation */
-function loadInitialSearchParams(): SpecialistsSearchForm {
-  try {
-    if (typeof window === "undefined") {
-      return DefaultSpecialistSearchParams;
-    }
-    const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    const merged = { ...DefaultSpecialistSearchParams, ...parsed };
-    const res = specialistsSearchSchema.safeParse(merged);
-    return res.success ? res.data : DefaultSpecialistSearchParams;
-  } catch (e) {
-    console.error("Failed to load search params:", e);
-    return DefaultSpecialistSearchParams;
-  }
-}
-
 /**
  * Build the payload for the server action:
  * - client 1-based page → server 0-based
  * - include client PAGE_SIZE
  * - omit empty values relative to defaults
- * - ALWAYS return an object (never undefined) to satisfy the server action signature
+ * - ALWAYS return an object (never undefined)
  */
 function buildCleanSearchPayload(
   params: SpecialistsSearchForm,
@@ -90,28 +77,38 @@ function buildCleanSearchPayload(
     DefaultSpecialistSearchParams
   ) as Partial<SpecialistsSearchForm>;
 
-  // return {} if nothing meaningful changed; server action merges with defaults
   return Object.keys(clean).length === 0 ? {} : clean;
 }
 
 export const SpecialistSearchProvider: React.FC<
   SpecialistSearchProviderProps
 > = ({ children }) => {
-  const [searchParams, setSearchParams] = useState<SpecialistsSearchForm>(() =>
-    loadInitialSearchParams()
+  // 👇 single storage atom
+  const [storage, setStorage] = useAtom(storageStateAtom);
+
+  // local UI state (fast, controlled forms)
+  const [searchParams, setSearchParams] = useState<SpecialistsSearchForm>(
+    DefaultSpecialistSearchParams
   );
 
-  // persist on change
+  // Hydrate from storage once on mount
+  const hydratedRef = useRef(false);
   useEffect(() => {
-    try {
-      window.localStorage.setItem(
-        LOCAL_STORAGE_KEY,
-        JSON.stringify(searchParams)
-      );
-    } catch (e) {
-      console.error("Failed to save search params:", e);
-    }
-  }, [searchParams]);
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+
+    const merged = {
+      ...DefaultSpecialistSearchParams,
+      ...(storage.lastSearch ?? {}),
+    };
+    const res = specialistsSearchSchema.safeParse(merged);
+    setSearchParams(res.success ? res.data : DefaultSpecialistSearchParams);
+  }, [storage.lastSearch]);
+
+  // Persist to storage whenever searchParams change
+  useEffect(() => {
+    setStorage((prev) => ({ ...prev, lastSearch: searchParams }));
+  }, [searchParams, setStorage]);
 
   const changeOrder = useCallback((option: SpecialistSortOption) => {
     setSearchParams((prev) => ({
@@ -130,7 +127,7 @@ export const SpecialistSearchProvider: React.FC<
       typeof pageParam === "number" ? pageParam : Number(pageParam) || 1;
 
     const payload = buildCleanSearchPayload(searchParams, clientPage);
-    return await searchSpecialist(payload); // payload is always an object
+    return await searchSpecialist(payload);
   };
 
   const infiniteKey = useMemo<SearchKey>(
