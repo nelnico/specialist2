@@ -246,8 +246,9 @@ export function Header() {
         <div className="flex flex-1 items-center justify-end space-x-2">
           <nav className="flex items-center space-x-2">
             <SignedOut>
-              <SignInButton>In</SignInButton>
-              <SignUpButton>Up</SignUpButton>
+              <SignInButton>
+                <div>Sign In</div>
+              </SignInButton>
             </SignedOut>
             <SignedIn>
               <UserButton />

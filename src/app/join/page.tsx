@@ -1,20 +1,18 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { CreateAccountInfo } from "./components/create-account";
 import prisma from "@/lib/data/prisma";
 export const dynamic = "force-dynamic";
 
 const Page = async () => {
   const { userId } = await auth();
 
-  if (!userId) {
-    return <CreateAccountInfo />;
-  }
+  if (!userId) redirect("/join/sign-up");
 
   const user = await prisma.user.findUnique({
     where: { authProviderId: userId },
     select: { role: true }, // adjust to your schema
   });
+
   if (!user || !user.role) redirect("/join/as");
 
   return (

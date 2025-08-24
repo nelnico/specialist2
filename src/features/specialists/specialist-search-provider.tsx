@@ -155,6 +155,7 @@ export const SpecialistSearchProvider: React.FC<
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) =>
       lastPage?.length ? allPages.length + 1 : undefined,
+    placeholderData: (prev) => prev,
   });
 
   // Scroll-to-top when page changes
