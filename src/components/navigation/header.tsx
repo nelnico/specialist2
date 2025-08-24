@@ -25,6 +25,14 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/common/theme-toggle";
 import MobileLink from "./mobile-link";
+import { siteConfig } from "@/lib/data/site-config";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 
 const components: { title: string; href: string; description: string }[] = [
   {
@@ -152,14 +160,16 @@ export function Header() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <div className="h-6 w-6 rounded bg-primary" />
-            <span className="hidden font-bold sm:inline-block">Your Site</span>
+            <span className="hidden font-bold sm:inline-block">
+              {siteConfig.name}
+            </span>
           </Link>
         </div>
 
         <div className="mr-4 flex md:hidden">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <div className="h-6 w-6 rounded bg-primary" />
-            <span className="font-bold">Your Site</span>
+            <span className="font-bold">{siteConfig.name}</span>
           </Link>
         </div>
 
@@ -221,11 +231,12 @@ export function Header() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/join" passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Join Us
-                  </NavigationMenuLink>
-                </Link>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle()}
+                  href="/join"
+                >
+                  Join Us
+                </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
@@ -234,33 +245,14 @@ export function Header() {
         {/* Right Side - User Menu and Theme Toggle */}
         <div className="flex flex-1 items-center justify-end space-x-2">
           <nav className="flex items-center space-x-2">
+            <SignedOut>
+              <SignInButton>In</SignInButton>
+              <SignUpButton>Up</SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
             <ThemeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative h-8 w-8 rounded-full"
-                >
-                  <User className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </nav>
         </div>
       </div>
