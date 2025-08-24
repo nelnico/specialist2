@@ -1,12 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
-import React from "react";
+import { redirect } from "next/navigation";
 import { CreateAccountInfo } from "./components/create-account";
 import prisma from "@/lib/data/prisma";
-import RoleSelect from "./components/role-select";
-import { unstable_noStore } from "next/cache";
 
 const Page = async () => {
-  unstable_noStore();
   const { userId } = await auth();
 
   if (!userId) {
@@ -15,9 +12,9 @@ const Page = async () => {
 
   const user = await prisma.user.findUnique({
     where: { authProviderId: userId },
+    select: { role: true }, // adjust to your schema
   });
-
-  if (!user) return <RoleSelect />;
+  if (!user || !user.role) redirect("/join/as");
 
   return (
     <div>
