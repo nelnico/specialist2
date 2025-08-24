@@ -1,7 +1,6 @@
 "use client";
 
-import React, { forwardRef, KeyboardEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { forwardRef, KeyboardEvent } from "react";
 import type { SpecialistListItem } from "../../data/specialist-search-types";
 import { Card } from "@/components/ui/card";
 import { SpecialistRatingDisplay } from "@/features/specialist/components/specialist-rating-display";
@@ -10,25 +9,16 @@ import { LoadingOverlay } from "@/components/common/loading-overlay";
 type SpecialistCardProps = {
   specialist: SpecialistListItem;
   onClick: () => void;
+  isLoading?: boolean;
 };
 
 const SpecialistCard = forwardRef<HTMLDivElement, SpecialistCardProps>(
-  ({ specialist, onClick }, ref) => {
-    const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
-
-    const go = () => router.push(`/${specialist.id}`);
+  ({ specialist, onClick, isLoading }, ref) => {
     const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        go();
+        onClick();
       }
-    };
-
-    const handleClick = () => {
-      setIsLoading(true);
-      onClick();
-      go();
     };
 
     return (
@@ -36,7 +26,7 @@ const SpecialistCard = forwardRef<HTMLDivElement, SpecialistCardProps>(
         ref={ref}
         role="link"
         tabIndex={0}
-        onClick={handleClick}
+        onClick={onClick}
         onKeyDown={onKeyDown}
         className="p-0"
       >

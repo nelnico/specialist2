@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSpecialistSearch } from "../../specialist-search-provider";
 import { useInView } from "react-intersection-observer";
 import SpecialistCard from "./specialist-card";
 import useMounted from "@/hooks/use-mounted";
+import { useRouter } from "next/navigation";
 
 export default function SpecialistList() {
   const {
@@ -17,6 +18,8 @@ export default function SpecialistList() {
   } = useSpecialistSearch();
 
   const mounted = useMounted();
+  const router = useRouter();
+  const [loadingId, setLoadingId] = useState<number | null>(null);
 
   const { ref: sentinelRef, inView } = useInView({
     threshold: 0,
@@ -67,14 +70,21 @@ export default function SpecialistList() {
     sessionStorage.setItem("scrollPosition", window.scrollY.toString());
   };
 
+  const handleCardClick = (id: number) => {
+    setLoadingId(id);
+    savePosition();
+    router.push(`/${id}`);
+  };
+
   return (
     <div className="px-4 md:px-6 lg:px-8">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 mt-4">
         {specialists.map((specialist) => (
           <SpecialistCard
-            onClick={savePosition}
             key={specialist.id}
             specialist={specialist}
+            onClick={() => handleCardClick(specialist.id)}
+            isLoading={loadingId === specialist.id}
           />
         ))}
       </div>
