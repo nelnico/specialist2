@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { CreateAccountInfo } from "./components/create-account";
 import prisma from "@/lib/data/prisma";
+export const dynamic = "force-dynamic";
 
 const Page = async () => {
   const { userId } = await auth();
