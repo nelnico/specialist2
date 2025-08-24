@@ -3,8 +3,10 @@ import React from "react";
 import { CreateAccountInfo } from "./components/create-account";
 import prisma from "@/lib/data/prisma";
 import RoleSelect from "./components/role-select";
+import { unstable_noStore } from "next/cache";
 
 const Page = async () => {
+  unstable_noStore();
   const { userId } = await auth();
 
   if (!userId) {
