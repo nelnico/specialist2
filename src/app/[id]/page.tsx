@@ -12,7 +12,7 @@ export default async function Page({
   if (!Number.isInteger(id) || id <= 0) notFound();
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
+    <main className=" ">
       <Link href="/">Back</Link>
       <h1 className="text-2xl font-semibold">ID: {id}</h1>
       <Specialist id={id} />
