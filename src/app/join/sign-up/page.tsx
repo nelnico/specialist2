@@ -1,7 +1,13 @@
 import { SignUp } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { ChartLine, Clock, ShieldCheck, Sparkles } from "lucide-react";
+import { redirect } from "next/navigation";
 
-export default function Page() {
+export default async function Page() {
+  const { userId } = await auth();
+
+  if (userId) return redirect("/join");
+
   return (
     <div className=" grid flex-1 lg:grid-cols-2">
       <div className="hidden flex-1 items-center justify-end p-6 md:p-10 lg:flex">

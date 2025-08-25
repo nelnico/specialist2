@@ -6,14 +6,14 @@ export const dynamic = "force-dynamic";
 const Page = async () => {
   const { userId } = await auth();
 
-  if (!userId) redirect("/join/sign-up");
+  if (!userId) return redirect("/join/sign-up");
 
   const user = await prisma.user.findUnique({
     where: { authProviderId: userId },
     select: { role: true }, // adjust to your schema
   });
 
-  if (!user || !user.role) redirect("/join/as");
+  if (!user || !user.role) return redirect("/join/as");
 
   return (
     <div>
