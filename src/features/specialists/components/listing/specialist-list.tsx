@@ -45,9 +45,7 @@ export default function SpecialistList() {
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
-    if (isLoading) return;
-    if (isFetchingNextPage) return;
-    if (!hasNextPage) return;
+    if (isLoading || isFetchingNextPage || !hasNextPage) return;
 
     const needsMore =
       document.documentElement.scrollHeight <= window.innerHeight + 100;

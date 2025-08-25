@@ -1,25 +1,11 @@
-import { IMAGE_BASE_URL } from "@/lib/data/constants";
-import { SpecialistPhoto } from "../data/specialist-types";
-import Image from "next/image";
+import { getSpecialistPhotos } from "../data/specialist-actions";
 
 interface SpecialistPhotosProps {
-  data: SpecialistPhoto[];
+  id: number;
 }
-const SpecialistPhotos = ({ data }: SpecialistPhotosProps) => {
-  // model here will be SpecialistPhoto[]
-  return (
-    <div className="border p-4">
-      {data.map((photo) => (
-        <Image
-          key={photo.id}
-          src={`${IMAGE_BASE_URL}/${photo.url}`}
-          alt="just a pic"
-          width={600}
-          height={400}
-        />
-      ))}
-    </div>
-  );
+const SpecialistPhotos = async ({ id }: SpecialistPhotosProps) => {
+  const data = await getSpecialistPhotos(id);
+  return <div className="border p-4">{JSON.stringify(data, null, 2)}</div>;
 };
 
 export default SpecialistPhotos;
