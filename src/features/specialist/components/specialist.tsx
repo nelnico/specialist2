@@ -63,8 +63,8 @@ const Specialist = async ({ id }: { id: number }) => {
             </CardHeader>
             <CardContent className="overflow-y-auto">
               <p className="text-muted-foreground mb-4">
-                This is the right sidebar container. It's responsive and adapts
-                to different screen sizes.
+                This is the right sidebar container. It&apos;s responsive and
+                adapts to different screen sizes.
               </p>
               <div className="space-y-3">
                 <div className="p-3 bg-muted rounded-md">
