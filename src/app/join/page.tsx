@@ -1,34 +1,15 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/data/prisma";
-export const dynamic = "force-dynamic";
+import { getUserRole } from "@/lib/auth/getUserRole";
 
-const Page = async () => {
-  const { userId } = await auth();
+export default async function Page() {
+  const { userId, role } = await getUserRole();
 
-  if (!userId) return redirect("/join/sign-up");
+  // if no logged in user, redirect to /join/signup
+  if (!userId) redirect("/join/signup");
 
-  const user = await prisma.user.findUnique({
-    where: { authProviderId: userId },
-    select: { role: true }, // adjust to your schema
-  });
+  // if logged in but no role, redirect to /join/as
+  if (!role) redirect("/join/as");
 
-  if (!user || !user.role) return redirect("/join/as");
-
-  return (
-    <div>
-      <div>Join Page</div>
-      <ul>
-        <li>
-          If not logged in: show message with continue or login link (render
-          CreateAccountInfo)
-        </li>
-        <li>If logged in, but no user in system: redirect to join/as</li>
-        <li>If logged in, got user, but no role: redirect to join/as</li>
-        <li>If logged in, got user, got role....redirect to home</li>
-      </ul>
-    </div>
-  );
-};
-
-export default Page;
+  // if logged in and has role, they shouldn't be here
+  redirect("/");
+}
