@@ -7,6 +7,7 @@ export const ROUTES = {
   selectRole: "/join/as",
   joinClient: "/join/client",
   joinSpecialist: "/join/specialist",
+  joinAdvertiser: "/join/advertiser",
 } as const;
 
 import { redirect } from "next/navigation";
@@ -32,6 +33,9 @@ export async function requireUserWithRole() {
   const user = await getOrCreateCurrentUser();
   if (!user) redirect(ROUTES.signup);
   if (!user.role) redirect(ROUTES.selectRole);
+  if (user.role === "ADVERTISER") redirect(ROUTES.joinAdvertiser);
+  if (user.role === "CLIENT") redirect(ROUTES.joinClient);
+  if (user.role === "SPECIALIST") redirect(ROUTES.joinSpecialist);
   return user;
 }
 

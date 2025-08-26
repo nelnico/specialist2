@@ -80,7 +80,6 @@ async function createClients() {
           updatedAt: updatedAt,
           role: "CLIENT",
           authProviderId: faker.string.uuid(),
-          username: faker.internet.displayName({ firstName: name }),
         },
       });
       let client: Client | null = null;
@@ -157,7 +156,6 @@ async function createSpecialists() {
           updatedAt: updatedAt,
           role: "SPECIALIST",
           authProviderId: faker.string.uuid(),
-          username: faker.internet.displayName({ firstName: name }),
         },
       });
       if (user) {
