@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getUserRole } from "@/lib/auth/getUserRole";
+import SelectRole from "./select-role";
 
 export default async function Page() {
   const { userId, role } = await getUserRole();
@@ -11,5 +12,5 @@ export default async function Page() {
   if (role) redirect("/");
 
   // render role selection (user will set their role here)
-  return <div>here user will select role</div>;
+  return <SelectRole />;
 }

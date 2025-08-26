@@ -1,6 +1,5 @@
 import { getUserRole } from "@/lib/auth/getUserRole";
 import { SignUp } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
 import { ChartLine, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import { redirect } from "next/navigation";
 
