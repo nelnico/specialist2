@@ -11,6 +11,7 @@ enum UserRole {
   ADMIN
   CLIENT
   SPECIALIST
+  ADVERTISER
 }
 
 enum ClientMembershipType {
@@ -25,7 +26,6 @@ model User {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   role           UserRole?
-  username       String?     @unique
   authProviderId String      @unique
   lastLogin      DateTime?
   client         Client?
